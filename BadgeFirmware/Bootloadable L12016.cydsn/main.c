@@ -302,6 +302,11 @@ void Select ( unsigned char ch )
                 break;
             }
 #endif
+        
+        case 'z': 
+            l1logo(50);
+            break;
+   
         case ' ':
             //printf ( "StripLights_BLACK\n" );
             StripLights_DisplayClear ( 0 );
@@ -421,6 +426,7 @@ int main()
         StripLights_Dim ( 2 );
 #endif
 
+
         StripLights_DisplayClear ( StripLights_RED_MASK );
         CyDelay ( 500 );
     }
@@ -430,8 +436,11 @@ int main()
 
     StripLights_DisplayClear ( StripLights_BLUE_MASK );
     CyDelay ( 500 );
+    StripLights_Dim ( 1 );
+    l1logo(50);
 
     StripLights_DisplayClear ( 0 );
+    StripLights_Dim ( 2 );
 
     // test uarts , use to talk directly to the esp from the psoc UART pins add usb to serial adapter.
     //echo_uart();
@@ -451,7 +460,7 @@ int main()
             } while ( selected == lastselected );
 
 
-            Select ( selected );
+           Select ( selected );
 
             lastselected = selected;
         }
@@ -2003,4 +2012,166 @@ void Sparky ( uint16_t count )
 
     }
 
+}
+
+
+
+void Additive ( uint16_t count )
+{
+    led_color red;
+    led_color green;
+    led_color blue;
+    
+    red.c.r = 255;
+    red.c.g = 0; 
+    red.c.b = 0; 
+
+    green.c.r = 0;
+    green.c.g = 255;
+    green.c.b = 0;
+    
+    blue.c.r = 0;
+    blue.c.g = 0;
+    blue.c.b = 255;
+    
+    static int rpos = 12;
+    static int gpos = 1;
+    static int bpos = 10;
+    static int odd = 1;
+    static int step = 0;
+    int offset[4]={0,1,5,6};
+    int j;
+    for(j = 0; j < count; j++)
+    {
+        if(odd)
+        {
+            rpos+=6;
+            gpos-=6;
+            bpos+=5;
+        } else {
+            rpos-=6;
+            bpos-=6;
+            gpos+=5;
+        };
+        StripLights_DisplayClear ( StripLights_BLACK );
+        int i;
+        for(i = 0; i <= sizeof(offset); i++)
+        {
+            StripLights_Pixel (rpos+offset[i],0 , red.rgb );  
+            StripLights_Pixel (gpos+offset[i],0 , green.rgb ); 
+            StripLights_Pixel (bpos+offset[i],0 , blue.rgb );
+        }
+        while ( StripLights_Ready() == 0 );
+        {
+            trigger_delay(1000);
+        }
+        
+        if( step <=2 )
+        {
+            step++;
+        }
+        else
+        {
+            step=0;
+            odd=!odd;   
+        }
+        
+        
+    }
+    
+}
+
+
+void Smiley (int count)
+{
+    StripLights_DisplayClear ( StripLights_BLACK );
+        
+    StripLights_Pixel (1,0 , StripLights_WHITE );
+    StripLights_Pixel (2,0 , StripLights_WHITE );
+    StripLights_Pixel (3,0 , StripLights_WHITE );
+    StripLights_Pixel (5,0 , StripLights_WHITE );
+    StripLights_Pixel (9,0 , StripLights_WHITE );
+
+    
+    int randcol;
+    while ( StripLights_Ready() == 0 );
+    {
+        randcol=getColor ( rand() % StripLights_COLOR_WHEEL_SIZE );
+        StripLights_Pixel (18,0 , randcol);
+        StripLights_Pixel (16,0 , randcol);
+        StripLights_Pixel (1,0 , randcol );
+        StripLights_Pixel (2,0 , randcol );
+        StripLights_Pixel (3,0 , randcol );
+        StripLights_Pixel (5,0 , randcol );
+        StripLights_Pixel (9,0 , randcol );
+
+        trigger_delay(50);
+    }
+    
+    
+}
+
+
+void l1logo (int count)
+{
+    int i;
+    int j;
+    int k;
+    
+    StripLights_MemClear ( 0 );
+
+    StripLights_Pixel(14,0 , StripLights_RED );
+    StripLights_Pixel(5,0 ,  StripLights_BLUE);
+    
+    trigger_delay(500);
+    
+
+    StripLights_Pixel(4,0 , StripLights_RED );
+    StripLights_Pixel(9,0 , StripLights_RED );
+    StripLights_Pixel(13,0 , StripLights_RED );
+    StripLights_Pixel(14,0 , StripLights_RED );
+        
+    StripLights_Pixel(5,0 ,  StripLights_BLUE);
+    StripLights_Pixel(6,0 ,  StripLights_BLUE);
+    StripLights_Pixel(10,0 ,  StripLights_BLUE);
+    StripLights_Pixel(15,0 ,  StripLights_BLUE);
+    
+    trigger_delay(2000);
+    
+    StripLights_MemClear ( 0 );
+    
+    StripLights_Pixel(3,0 , StripLights_RED );
+    StripLights_Pixel(8,0 , StripLights_RED );
+    StripLights_Pixel(12,0 , StripLights_RED );
+    StripLights_Pixel(13,0 , StripLights_RED );
+        
+    StripLights_Pixel(6,0 ,  StripLights_BLUE);
+    StripLights_Pixel(7,0 ,  StripLights_BLUE);
+    StripLights_Pixel(11,0 ,  StripLights_BLUE);
+    StripLights_Pixel(16,0 ,  StripLights_BLUE);
+    
+    trigger_delay(2000);
+    
+    for(i = 0; i <= count; i++)
+    {
+        uint32_t rand1=getColor ( rand() % StripLights_COLOR_WHEEL_SIZE );
+        uint32_t rand2=getColor ( rand() % StripLights_COLOR_WHEEL_SIZE );
+        uint32_t rand3=getColor ( rand() % StripLights_COLOR_WHEEL_SIZE );
+        
+        StripLights_MemClear ( 0 );
+
+        StripLights_Pixel(3,0 , rand1 );
+        StripLights_Pixel(8,0 , rand1 );
+        StripLights_Pixel(12,0 , rand1 );
+        StripLights_Pixel(13,0 , rand1 );
+        
+        StripLights_Pixel(6,0 ,  rand2);
+        StripLights_Pixel(7,0 ,  rand2);
+        StripLights_Pixel(11,0 ,  rand2);
+        StripLights_Pixel(16,0 ,  rand2);
+        
+        trigger_delay(100);
+    }
+    
+    
 }
